@@ -4,7 +4,8 @@
   "description": "let's code node.js",
   "main": "server.js",
   "scripts": {
-    "dev:server": "nodemon --exec babel-node server.js"
+    "dev:server": "nodemon --exec babel-node server.js",
+    "build:styles": "gulp styles"
   },
   "repository": {
     "type": "git",
@@ -18,7 +19,10 @@
   "homepage": "https://github.com/DevelopJKong/guess-mine#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "gulp": "^4.0.2",
+    "gulp-sass": "^5.0.0",
     "morgan": "^1.10.0",
+    "node-sass": "^7.0.0",
     "pug": "^3.0.2",
     "socket.io": "^4.4.0"
   },
