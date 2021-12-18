@@ -13,7 +13,7 @@ const paths = {
   },
 };
 
-function styles() {
+const styles = () => {
   return gulp
     .src(paths.styles.src)
     .pipe(sass())
@@ -26,7 +26,7 @@ function styles() {
     .pipe(gulp.dest(paths.styles.dest));
 }
 
-function watchFiles() {
+const watchFiles = () => {
   gulp.watch(paths.styles.watch, styles);
 }
 

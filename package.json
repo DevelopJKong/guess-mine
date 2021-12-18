@@ -4,7 +4,7 @@
   "description": "let's code node.js",
   "main": "server.js",
   "scripts": {
-    "dev:server": "nodemon --exec babel-node server.js",
+    "dev:server": "nodemon --exec babel-node src/server.js",
     "dev:assets": "gulp"
   },
   "repository": {
