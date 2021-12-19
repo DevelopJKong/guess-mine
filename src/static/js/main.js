@@ -5,13 +5,21 @@ var body = document.querySelector("body");
 var loginForm = document.getElementById("jsLogin");
 var NICKNAME = "nickname";
 var LOGGED_OUT = "loggedOut";
-var LOGGED_IN = "logged";
+var LOGGED_IN = "loggedIn";
 var nickname = localStorage.getItem(NICKNAME);
+
+var logIn = function logIn(nickname) {
+  var socket = io("/");
+  socket.emit("setNickname", {
+    nickname: nickname
+  });
+};
 
 if (nickname === null) {
   body.className = LOGGED_OUT;
 } else {
   body.className = LOGGED_IN;
+  logIn(nickname);
 }
 
 var handleFormSubmit = function handleFormSubmit(e) {
@@ -20,10 +28,17 @@ var handleFormSubmit = function handleFormSubmit(e) {
   var value = input.value;
   input.value = "";
   localStorage.setItem(NICKNAME, value);
+  body.className = LOGGED_IN;
+  logIn(value);
 };
 
 if (loginForm) {
   loginForm.addEventListener("submit", handleFormSubmit);
 }
 
-},{}]},{},[1]);
+},{}],2:[function(require,module,exports){
+"use strict";
+
+require("./login");
+
+},{"./login":1}]},{},[2]);
