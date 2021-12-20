@@ -13,9 +13,9 @@ app.use(express.static(join(__dirname, "static")));
 
 app.use(logger("dev"));
 
-app.get("/", (req, res) => {
-  return res.render("home", { events:JSON.stringify(events) });
-});
+app.get("/", (req, res) =>
+  res.render("home", { events: JSON.stringify(events) })
+);
 
 const handleListening = () =>
   console.log(`😎 Server running: http://localhost:${PORT}`);
