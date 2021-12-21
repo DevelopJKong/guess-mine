@@ -6,10 +6,11 @@ const colors = document.getElementsByClassName("jsColor");
 const mode = document.getElementById("jsMode");
 
 const INITIAL_COLOR = "#2c2c2c";
-const CANVAS_SIZE = 400;
+const CANVAS_SIZE = 500;
 
-canvas.width = document.getElementsByClassName("canvas")[0].offsetWidth;
-canvas.height = document.getElementsByClassName("canvas")[0].offsetHeight;
+
+canvas.width = CANVAS_SIZE;
+canvas.height = CANVAS_SIZE;
 
 ctx.fillStyle = "white";
 ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);

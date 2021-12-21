@@ -140,9 +140,9 @@ var ctx = canvas.getContext("2d");
 var colors = document.getElementsByClassName("jsColor");
 var mode = document.getElementById("jsMode");
 var INITIAL_COLOR = "#2c2c2c";
-var CANVAS_SIZE = 400;
-canvas.width = document.getElementsByClassName("canvas")[0].offsetWidth;
-canvas.height = document.getElementsByClassName("canvas")[0].offsetHeight;
+var CANVAS_SIZE = 500;
+canvas.width = CANVAS_SIZE;
+canvas.height = CANVAS_SIZE;
 ctx.fillStyle = "white";
 ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 ctx.strokeStyle = INITIAL_COLOR;
@@ -283,7 +283,7 @@ var initSockets = function initSockets(aSocket) {
   aSocket.on(events.disconnected, _notifications.handleDisconnected);
   aSocket.on(events.newMsg, _chat.handleNewMessage);
   aSocket.on(events.beganPath, _paint.handleBeganPath);
-  aSocket.on(events.stokePath, _paint.handleStrokePath);
+  aSocket.on(events.strokedPath, _paint.handleStrokedPath);
 };
 
 exports.initSockets = initSockets;
