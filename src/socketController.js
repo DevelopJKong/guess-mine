@@ -1,6 +1,6 @@
 import events from "./events";
 
-const socketController = socket => {
+const socketController = (socket) => {
   const broadcast = (event, data) => socket.broadcast.emit(event, data);
 
   socket.on(events.setNickname, ({ nickname }) => {
@@ -10,6 +10,17 @@ const socketController = socket => {
 
   socket.on(events.disconnect, () => {
     broadcast(events.disconnected, { nickname: socket.nickname });
+  });
+
+  socket.on(events.sendMsg, ({ message }) => {
+    broadcast(events.newMsg, { message, nickname: socket.nickname });
+  });
+
+  socket.on(events.beginPath, ({x,y}) => {
+    broadcast(events.beganPath,{x,y});
+  });
+  socket.on(events.stokePath, ({x,y}) => {
+    broadcast(events.strokedPath,{x,y});
   });
 };
 

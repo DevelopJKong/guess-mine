@@ -1,12 +1,19 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 
-var messages = document.getElementById("#jsMessages");
-var sendMsg = document.getElementById("#jsMessages");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.handleNewMessage = void 0;
+
+var _sockets = require("./sockets");
+
+var messages = document.getElementById("jsMessages");
+var sendMsg = document.getElementById("jsSendMsg");
 
 var appendMsg = function appendMsg(text, nickname) {
   var li = document.createElement("li");
-  li.innerHTML = "\n        <span class=\"author ".concat(nickname ? "out" : "self", "\">").concat(nickname ? nickname : "YOU", "</span> ").concat(text, "\n    ");
+  li.innerHTML = "\n        <span class=\"author ".concat(nickname ? "out" : "self", "\">").concat(nickname ? nickname : "You", ":</span> ").concat(text, "\n    ");
   messages.appendChild(li);
 };
 
@@ -14,15 +21,26 @@ var handleSendMsg = function handleSendMsg(event) {
   event.preventDefault();
   var input = sendMsg.querySelector("input");
   var value = input.value;
+  (0, _sockets.getSocket)().emit(window.events.sendMsg, {
+    message: value
+  });
   input.value = "";
   appendMsg(value);
 };
+
+var handleNewMessage = function handleNewMessage(_ref) {
+  var message = _ref.message,
+      nickname = _ref.nickname;
+  return appendMsg(message, nickname);
+};
+
+exports.handleNewMessage = handleNewMessage;
 
 if (sendMsg) {
   sendMsg.addEventListener("submit", handleSendMsg);
 }
 
-},{}],2:[function(require,module,exports){
+},{"./sockets":6}],2:[function(require,module,exports){
 "use strict";
 
 var _sockets = require("./sockets");
@@ -64,7 +82,7 @@ if (loginForm) {
   loginForm.addEventListener("submit", handleFormSubmit);
 }
 
-},{"./sockets":5}],3:[function(require,module,exports){
+},{"./sockets":6}],3:[function(require,module,exports){
 "use strict";
 
 require("./sockets");
@@ -73,14 +91,17 @@ require("./login");
 
 require("./chat");
 
-},{"./chat":1,"./login":2,"./sockets":5}],4:[function(require,module,exports){
+require("./paint");
+
+},{"./chat":1,"./login":2,"./paint":5,"./sockets":6}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.handleNewUser = exports.handleDisconnected = void 0;
-var body = document.getElementById("jsNotifications");
+var body = document.querySelector("body");
+console.log(body);
 
 var fireNotification = function fireNotification(text, color) {
   var notification = document.createElement("div");
@@ -110,9 +131,135 @@ exports.handleDisconnected = handleDisconnected;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.handleStrokedPath = exports.handleBeganPath = void 0;
+
+var _sockets = require("./sockets");
+
+var canvas = document.getElementById("jsCanvas");
+var ctx = canvas.getContext("2d");
+var colors = document.getElementsByClassName("jsColor");
+var mode = document.getElementById("jsMode");
+var INITIAL_COLOR = "#2c2c2c";
+var CANVAS_SIZE = 400;
+canvas.width = document.getElementsByClassName("canvas")[0].offsetWidth;
+canvas.height = document.getElementsByClassName("canvas")[0].offsetHeight;
+ctx.fillStyle = "white";
+ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+ctx.strokeStyle = INITIAL_COLOR;
+ctx.fillStyle = INITIAL_COLOR;
+ctx.lineWidth = 2.5;
+var painting = false;
+var filling = false;
+
+function stopPainting() {
+  painting = false;
+}
+
+function startPainting() {
+  painting = true;
+}
+
+var beginPath = function beginPath(x, y) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+};
+
+var strokePath = function strokePath(x, y) {
+  ctx.lineTo(x, y);
+  ctx.stroke();
+};
+
+function onMouseMove(event) {
+  var x = event.offsetX;
+  var y = event.offsetY;
+
+  if (!painting) {
+    beginPath(x, y);
+    (0, _sockets.getSocket)().emit(window.events.beginPath, {
+      x: x,
+      y: y
+    });
+  } else {
+    strokePath(x, y);
+    (0, _sockets.getSocket)().emit(window.events.strokePath, {
+      x: x,
+      y: y
+    });
+  }
+}
+
+function handleColorClick(event) {
+  var color = event.target.style.backgroundColor;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+}
+
+function handleModeClick() {
+  if (filling === true) {
+    filling = false;
+    mode.innerText = "Fill";
+  } else {
+    filling = true;
+    mode.innerText = "Paint";
+  }
+}
+
+function handleCanvasClick() {
+  if (filling) {
+    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+  }
+}
+
+function handleCM(event) {
+  event.preventDefault();
+}
+
+if (canvas) {
+  canvas.addEventListener("mousemove", onMouseMove);
+  canvas.addEventListener("mousedown", startPainting);
+  canvas.addEventListener("mouseup", stopPainting);
+  canvas.addEventListener("mouseleave", stopPainting);
+  canvas.addEventListener("click", handleCanvasClick);
+  canvas.addEventListener("contextmenu", handleCM);
+}
+
+Array.from(colors).forEach(function (color) {
+  return color.addEventListener("click", handleColorClick);
+});
+
+if (mode) {
+  mode.addEventListener("click", handleModeClick);
+}
+
+var handleBeganPath = function handleBeganPath(_ref) {
+  var x = _ref.x,
+      y = _ref.y;
+  return beginPath(x, y);
+};
+
+exports.handleBeganPath = handleBeganPath;
+
+var handleStrokedPath = function handleStrokedPath(_ref2) {
+  var x = _ref2.x,
+      y = _ref2.y;
+  return strokePath(x, y);
+};
+
+exports.handleStrokedPath = handleStrokedPath;
+
+},{"./sockets":6}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.updateSocket = exports.initSockets = exports.getSocket = void 0;
 
 var _notifications = require("./notifications");
+
+var _chat = require("./chat");
+
+var _paint = require("./paint");
 
 var socket = null;
 
@@ -134,8 +281,11 @@ var initSockets = function initSockets(aSocket) {
   updateSocket(aSocket);
   aSocket.on(events.newUser, _notifications.handleNewUser);
   aSocket.on(events.disconnected, _notifications.handleDisconnected);
+  aSocket.on(events.newMsg, _chat.handleNewMessage);
+  aSocket.on(events.beganPath, _paint.handleBeganPath);
+  aSocket.on(events.stokePath, _paint.handleStrokePath);
 };
 
 exports.initSockets = initSockets;
 
-},{"./notifications":4}]},{},[3]);
+},{"./chat":1,"./notifications":4,"./paint":5}]},{},[3]);
