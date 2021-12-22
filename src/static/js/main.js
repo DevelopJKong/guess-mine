@@ -40,7 +40,7 @@ if (sendMsg) {
   sendMsg.addEventListener("submit", handleSendMsg);
 }
 
-},{"./sockets":6}],2:[function(require,module,exports){
+},{"./sockets":7}],2:[function(require,module,exports){
 "use strict";
 
 var _sockets = require("./sockets");
@@ -82,7 +82,7 @@ if (loginForm) {
   loginForm.addEventListener("submit", handleFormSubmit);
 }
 
-},{"./sockets":6}],3:[function(require,module,exports){
+},{"./sockets":7}],3:[function(require,module,exports){
 "use strict";
 
 require("./sockets");
@@ -93,7 +93,9 @@ require("./chat");
 
 require("./paint");
 
-},{"./chat":1,"./login":2,"./paint":5,"./sockets":6}],4:[function(require,module,exports){
+require("./players");
+
+},{"./chat":1,"./login":2,"./paint":5,"./players":6,"./sockets":7}],4:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -101,7 +103,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.handleNewUser = exports.handleDisconnected = void 0;
 var body = document.querySelector("body");
-console.log(body);
 
 var fireNotification = function fireNotification(text, color) {
   var notification = document.createElement("div");
@@ -279,7 +280,32 @@ var handleFilled = function handleFilled(_ref3) {
 
 exports.handleFilled = handleFilled;
 
-},{"./sockets":6}],6:[function(require,module,exports){
+},{"./sockets":7}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.handlePlayerUpdate = void 0;
+var board = document.getElementById("jsPBoard");
+
+var addPlayers = function addPlayers(players) {
+  board.innerHTML = "";
+  players.forEach(function (player) {
+    var playerElement = document.createElement("span");
+    playerElement.innerText = "".concat(player.nickname, ": ").concat(player.point);
+    board.appendChild(playerElement);
+  });
+};
+
+var handlePlayerUpdate = function handlePlayerUpdate(_ref) {
+  var sockets = _ref.sockets;
+  return addPlayers(sockets);
+};
+
+exports.handlePlayerUpdate = handlePlayerUpdate;
+
+},{}],7:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -292,6 +318,8 @@ var _notifications = require("./notifications");
 var _chat = require("./chat");
 
 var _paint = require("./paint");
+
+var _players = require("./players");
 
 var socket = null;
 
@@ -311,8 +339,9 @@ var initSockets = function initSockets(aSocket) {
   socket.on(events.beganPath, _paint.handleBeganPath);
   socket.on(events.strokedPath, _paint.handleStrokedPath);
   socket.on(events.filled, _paint.handleFilled);
+  socket.on(events.playerUpdate, _players.handlePlayerUpdate);
 };
 
 exports.initSockets = initSockets;
 
-},{"./chat":1,"./notifications":4,"./paint":5}]},{},[3]);
+},{"./chat":1,"./notifications":4,"./paint":5,"./players":6}]},{},[3]);

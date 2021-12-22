@@ -1,5 +1,4 @@
 const body = document.querySelector("body");
-console.log(body);
 
 const fireNotification = (text, color) => {
     const notification = document.createElement("div");

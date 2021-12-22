@@ -1,15 +1,38 @@
 import events from "./events";
 
-const socketController = (socket) => {
+let sockets = [];
+let inProgress = false;
+let word = null;
+
+const chooseLeader = () => {
+  sockets[Math.floor(Math.random()) * sockets.length];
+}
+
+const socketController = (socket,io) => {
   const broadcast = (event, data) => socket.broadcast.emit(event, data);
+  const superBroadcast = (event,data) => io.emit(event, data);
+  const sendPlayerUpdate = () => superBroadcast(events.playerUpdate,{sockets});
+  const startGame = () => {
+    if(inProgress === false) {
+      inProgress = true;
+      const leader = chooseLeader();
+      word = chooseWord();
+    }
+  }
+
 
   socket.on(events.setNickname, ({ nickname }) => {
     socket.nickname = nickname;
+    sockets.push({id:socket.id, point:0 , nickname: nickname});
     broadcast(events.newUser, { nickname });
+    sendPlayerUpdate();
+    startGame();
   });
 
   socket.on(events.disconnect, () => {
+    sockets = sockets.filter(aSocket => aSocket.id !== socket.id); 
     broadcast(events.disconnected, { nickname: socket.nickname });
+    sendPlayerUpdate();
   });
 
   socket.on(events.sendMsg, ({ message }) =>
@@ -29,5 +52,6 @@ const socketController = (socket) => {
   });
 
 };
+
 
 export default socketController;
