@@ -5,7 +5,6 @@ let inProgress = false;
 let word = null;
 let leader = null;
 
-
 const chooseLeader = () => sockets[Math.floor(Math.random() * sockets.length)];
 
 const socketController = (socket, io) => {
@@ -19,16 +18,30 @@ const socketController = (socket, io) => {
       leader = chooseLeader();
       console.log(leader);
       word = chooseWord();
+      superBroadcast(events.gameStarting);
       setTimeout(() => {
         superBroadcast(events.gameStarted);
         io.to(leader.id).emit(events.leaderNotif, { word });
       }, 2000);
     }
+     
   };
+
   const endGame = () => {
     inProgress = false;
     superBroadcast(events.gameEnded);
   };
+
+  const addPoints = (id) => {
+    sockets = sockets.map(socket => {
+      if(socket.id === id) {
+        socket.points += 10;
+      }
+      return socket;
+    }); 
+    sendPlayerUpdate();
+    endGame();
+  }
 
   socket.on(events.setNickname, ({ nickname }) => {
     socket.nickname = nickname;
@@ -42,10 +55,10 @@ const socketController = (socket, io) => {
 
   socket.on(events.disconnect, () => {
     sockets = sockets.filter((aSocket) => aSocket.id !== socket.id);
-    if (sockets.length === 1 ) {
+    if (sockets.length === 1) {
       endGame();
-    } else if(leader) {
-      if(leader.id === socket.id) {
+    } else if (leader) {
+      if (leader.id === socket.id) {
         endGame();
       }
     }
@@ -53,9 +66,17 @@ const socketController = (socket, io) => {
     sendPlayerUpdate();
   });
 
-  socket.on(events.sendMsg, ({ message }) =>
-    broadcast(events.newMsg, { message, nickname: socket.nickname })
-  );
+  socket.on(events.sendMsg, ({ message }) => {
+    if (message === word) {
+      superBroadcast(events.newMsg, {
+        message: `Winner is ${socket.nickname}, word was ${word}`,
+        nickname: "Bot",
+      });
+      addPoints(socket.id);
+    } else {
+      broadcast(events.newMsg, { message, nickname: socket.nickname });
+    }
+  });
 
   socket.on(events.beginPath, ({ x, y }) =>
     broadcast(events.beganPath, { x, y })
